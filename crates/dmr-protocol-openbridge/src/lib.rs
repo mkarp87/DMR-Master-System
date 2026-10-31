@@ -3,5 +3,9 @@
 //! network policy are implemented independently.
 pub use dmr_protocol_hbp::{DmrdPacket, HbpError};
 
-pub fn parse_dmrd(data:&[u8])->Result<DmrdPacket,HbpError>{DmrdPacket::parse(data)}
-pub fn encode_dmrd(packet:&DmrdPacket)->Vec<u8>{packet.encode()}
+pub fn parse_dmrd(data: &[u8]) -> Result<DmrdPacket, HbpError> {
+    DmrdPacket::parse(data)
+}
+pub fn encode_dmrd(packet: &DmrdPacket) -> Vec<u8> {
+    packet.encode()
+}
