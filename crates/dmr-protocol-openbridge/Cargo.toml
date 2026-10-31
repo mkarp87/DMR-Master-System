@@ -1,0 +1,9 @@
+[package]
+name = "dmr-protocol-openbridge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+dmr-protocol-hbp = { path = "../dmr-protocol-hbp" }
+thiserror.workspace = true
