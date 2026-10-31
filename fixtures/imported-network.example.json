@@ -1,0 +1,64 @@
+{
+  "systems": [
+    {
+      "name": "REPEATER-DEMO",
+      "legacy_mode": "MASTER",
+      "normalized_mode": "homebrew_server",
+      "enabled": true,
+      "ip": "0.0.0.0",
+      "port": 62031,
+      "target_ip": null,
+      "target_port": null,
+      "max_repeaters": 1
+    },
+    {
+      "name": "OPENBRIDGE-DEMO",
+      "legacy_mode": "OPENBRIDGE",
+      "normalized_mode": "openbridge",
+      "enabled": false,
+      "ip": "192.0.2.10",
+      "port": 54000,
+      "target_ip": "198.51.100.20",
+      "target_port": 54000,
+      "max_repeaters": null
+    }
+  ],
+  "bridges": [
+    {
+      "name": "DEMO-BRIDGE",
+      "members": [
+        {
+          "system": "REPEATER-DEMO",
+          "timeslot": 1,
+          "talkgroup": 1001,
+          "active": false,
+          "timeout_minutes": 15,
+          "timeout_type": "ON",
+          "on": [
+            1001
+          ],
+          "off": [
+            4000
+          ],
+          "reset": []
+        },
+        {
+          "system": "OPENBRIDGE-DEMO",
+          "timeslot": 1,
+          "talkgroup": 2001,
+          "active": true,
+          "timeout_minutes": 15,
+          "timeout_type": "NONE",
+          "on": [],
+          "off": [],
+          "reset": []
+        }
+      ]
+    }
+  ],
+  "obp_bridges": {},
+  "unit_systems": [],
+  "validation": {
+    "missing_system_references": []
+  }
+}

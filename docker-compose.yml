@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dmr_master
+      POSTGRES_USER: dmr_master
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dmr_master -d dmr_master"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  dmr-master:
+    build: .
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      RUST_LOG: ${RUST_LOG:-info}
+      DMR_HBLINK_CONFIG: /opt/dmr-master/fixtures/hblink.example.cfg
+      DATABASE_URL: postgresql://dmr_master:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@127.0.0.1:5432/dmr_master
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
