@@ -8,4 +8,5 @@ license.workspace = true
 dmr-core = { path = "../dmr-core" }
 configparser.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true

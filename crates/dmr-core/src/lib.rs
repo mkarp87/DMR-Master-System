@@ -4,10 +4,14 @@ use uuid::Uuid;
 
 macro_rules! id_type {
     ($name:ident) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+        #[derive(
+            Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize,
+        )]
         pub struct $name(pub u32);
         impl fmt::Display for $name {
-            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { write!(f, "{}", self.0) }
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "{}", self.0)
+            }
         }
     };
 }
@@ -19,14 +23,31 @@ id_type!(NetworkId);
 id_type!(StreamId);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Timeslot { One, Two }
+pub enum Timeslot {
+    One,
+    Two,
+}
 impl Timeslot {
-    pub fn from_u8(v: u8) -> Option<Self> { match v { 1 => Some(Self::One), 2 => Some(Self::Two), _ => None } }
-    pub fn as_u8(self) -> u8 { match self { Self::One => 1, Self::Two => 2 } }
+    pub fn from_u8(v: u8) -> Option<Self> {
+        match v {
+            1 => Some(Self::One),
+            2 => Some(Self::Two),
+            _ => None,
+        }
+    }
+    pub fn as_u8(self) -> u8 {
+        match self {
+            Self::One => 1,
+            Self::Two => 2,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum CallType { Group, Private }
+pub enum CallType {
+    Group,
+    Private,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum FrameKind {
@@ -51,7 +72,11 @@ pub struct DmrFrame {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum EndpointProtocol { Homebrew, OpenBridge, Ipsc }
+pub enum EndpointProtocol {
+    Homebrew,
+    OpenBridge,
+    Ipsc,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum EndpointKind {
@@ -63,7 +88,10 @@ pub enum EndpointKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum IpscRole { Master, Peer }
+pub enum IpscRole {
+    Master,
+    Peer,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum EndpointRole {
@@ -84,7 +112,11 @@ pub struct Endpoint {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum TimeoutPolicy { None, On, Off }
+pub enum TimeoutPolicy {
+    None,
+    On,
+    Off,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BridgeMember {
@@ -100,7 +132,10 @@ pub struct BridgeMember {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Bridge { pub name: String, pub members: Vec<BridgeMember> }
+pub struct Bridge {
+    pub name: String,
+    pub members: Vec<BridgeMember>,
+}
 
 #[derive(Debug)]
 pub struct SessionRuntime {

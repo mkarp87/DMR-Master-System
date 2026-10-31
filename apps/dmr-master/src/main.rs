@@ -53,8 +53,7 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    let cfg =
-        std::env::var("DMR_HBLINK_CONFIG").unwrap_or_else(|_| "fixtures/hblink.cfg".into());
+    let cfg = std::env::var("DMR_HBLINK_CONFIG").unwrap_or_else(|_| "fixtures/hblink.cfg".into());
     let imported = import_hblink_cfg(PathBuf::from(cfg))?;
     info!(
         systems = imported.systems.len(),
@@ -72,7 +71,11 @@ async fn main() -> Result<()> {
         }
     };
     let route_table = Arc::new(RouteTable::compile(&bridges));
-    info!(routes = route_table.len(), bridges = bridges.len(), "route table compiled");
+    info!(
+        routes = route_table.len(),
+        bridges = bridges.len(),
+        "route table compiled"
+    );
 
     let (ingress_tx, ingress_rx) = mpsc::channel::<IngressFrame>(4096);
     let mut endpoint_outputs = HashMap::<String, mpsc::Sender<DmrdPacket>>::new();
@@ -131,13 +134,8 @@ async fn main() -> Result<()> {
             let ingress = ingress_tx.clone();
 
             tokio::spawn(async move {
-                if let Err(e) = run_openbridge_endpoint(
-                    system,
-                    local_network_id,
-                    ingress,
-                    outbound_rx,
-                )
-                .await
+                if let Err(e) =
+                    run_openbridge_endpoint(system, local_network_id, ingress, outbound_rx).await
                 {
                     warn!(error = %e, "OpenBridge endpoint stopped");
                 }
@@ -365,7 +363,12 @@ async fn run_openbridge_endpoint(
         .await
         .with_context(|| format!("{}: unable to resolve OpenBridge target", system.name))?
         .next()
-        .ok_or_else(|| anyhow!("{}: OpenBridge target resolved to no addresses", system.name))?;
+        .ok_or_else(|| {
+            anyhow!(
+                "{}: OpenBridge target resolved to no addresses",
+                system.name
+            )
+        })?;
 
     let socket = UdpSocket::bind((bind_ip, bind_port)).await?;
     let codec = OpenBridgeCodec::new(

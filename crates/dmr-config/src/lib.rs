@@ -241,7 +241,8 @@ mod tests {
             ]
           }]
         }"#;
-        let path = std::env::temp_dir().join(format!("dmr-master-test-{}.json", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("dmr-master-test-{}.json", std::process::id()));
         fs::write(&path, json).unwrap();
         let bridges = import_network_json(&path).unwrap();
         fs::remove_file(path).ok();
