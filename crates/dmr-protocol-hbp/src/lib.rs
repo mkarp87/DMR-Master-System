@@ -38,36 +38,16 @@ pub struct DmrdPacket {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HbpPacket {
     Dmrd(DmrdPacket),
-    RepeaterLogin {
-        repeater_id: u32,
-    },
-    RepeaterKey {
-        repeater_id: u32,
-        digest: Vec<u8>,
-    },
-    RepeaterConfig {
-        repeater_id: u32,
-        config: Vec<u8>,
-    },
-    RepeaterPing {
-        repeater_id: u32,
-    },
-    RepeaterClose {
-        repeater_id: u32,
-    },
-    RepeaterOptions {
-        repeater_id: u32,
-        options: Vec<u8>,
-    },
-    MasterPong {
-        repeater_id: u32,
-    },
+    RepeaterLogin { repeater_id: u32 },
+    RepeaterKey { repeater_id: u32, digest: Vec<u8> },
+    RepeaterConfig { repeater_id: u32, config: Vec<u8> },
+    RepeaterPing { repeater_id: u32 },
+    RepeaterClose { repeater_id: u32 },
+    RepeaterOptions { repeater_id: u32, options: Vec<u8> },
+    MasterPong { repeater_id: u32 },
     MasterAck(Vec<u8>),
     MasterNak(Vec<u8>),
-    Other {
-        tag: [u8; 4],
-        data: Vec<u8>,
-    },
+    Other { tag: [u8; 4], data: Vec<u8> },
 }
 
 fn be_u24(v: &[u8]) -> u32 {
@@ -318,7 +298,11 @@ pub struct HbpMaster {
 }
 
 impl HbpMaster {
-    pub fn new(passphrase: impl Into<Vec<u8>>, max_repeaters: usize, session_timeout: Duration) -> Self {
+    pub fn new(
+        passphrase: impl Into<Vec<u8>>,
+        max_repeaters: usize,
+        session_timeout: Duration,
+    ) -> Self {
         Self {
             passphrase: passphrase.into(),
             max_repeaters: max_repeaters.max(1),
@@ -349,7 +333,8 @@ impl HbpMaster {
     ) -> Vec<MasterEvent> {
         match packet {
             HbpPacket::RepeaterLogin { repeater_id } => {
-                if !self.peers.contains_key(&repeater_id) && self.peers.len() >= self.max_repeaters {
+                if !self.peers.contains_key(&repeater_id) && self.peers.len() >= self.max_repeaters
+                {
                     return vec![
                         MasterEvent::Send {
                             destination: remote,
@@ -459,7 +444,11 @@ impl HbpMaster {
             }
             HbpPacket::RepeaterOptions { repeater_id, .. } => {
                 let Some(session) = self.peers.get_mut(&repeater_id) else {
-                    return self.reject(remote, repeater_id, "options from unauthenticated repeater");
+                    return self.reject(
+                        remote,
+                        repeater_id,
+                        "options from unauthenticated repeater",
+                    );
                 };
 
                 if session.remote != remote || session.state != SessionState::Connected {
@@ -536,7 +525,12 @@ impl HbpMaster {
             .collect()
     }
 
-    fn reject(&self, remote: SocketAddr, repeater_id: u32, reason: &'static str) -> Vec<MasterEvent> {
+    fn reject(
+        &self,
+        remote: SocketAddr,
+        repeater_id: u32,
+        reason: &'static str,
+    ) -> Vec<MasterEvent> {
         vec![
             MasterEvent::Send {
                 destination: remote,
@@ -622,14 +616,14 @@ mod tests {
         let repeater_id = 1_234_567;
         let mut master = HbpMaster::new(b"secret".to_vec(), 10, Duration::from_secs(60));
 
-        let login_events = master.handle_packet(
-            remote,
-            HbpPacket::RepeaterLogin { repeater_id },
-            now,
-        );
+        let login_events =
+            master.handle_packet(remote, HbpPacket::RepeaterLogin { repeater_id }, now);
         assert_eq!(login_events.len(), 1);
         let challenge = master.peers()[&repeater_id].challenge;
-        assert_eq!(master.peers()[&repeater_id].state, SessionState::ChallengeSent);
+        assert_eq!(
+            master.peers()[&repeater_id].state,
+            SessionState::ChallengeSent
+        );
 
         let auth_events = master.handle_packet(
             remote,
@@ -642,7 +636,10 @@ mod tests {
         assert!(auth_events
             .iter()
             .any(|e| matches!(e, MasterEvent::Authenticated { .. })));
-        assert_eq!(master.peers()[&repeater_id].state, SessionState::WaitingConfig);
+        assert_eq!(
+            master.peers()[&repeater_id].state,
+            SessionState::WaitingConfig
+        );
 
         let config_events = master.handle_packet(
             remote,
@@ -680,11 +677,8 @@ mod tests {
             payload: [0; 33],
             trailing: vec![],
         };
-        let frame_events = master.handle_packet(
-            remote,
-            HbpPacket::Dmrd(dmrd),
-            now + Duration::from_secs(4),
-        );
+        let frame_events =
+            master.handle_packet(remote, HbpPacket::Dmrd(dmrd), now + Duration::from_secs(4));
         assert!(frame_events
             .iter()
             .any(|e| matches!(e, MasterEvent::Frame { .. })));
@@ -696,11 +690,7 @@ mod tests {
         let remote = addr(50001);
         let repeater_id = 2_345_678;
         let mut master = HbpMaster::new(b"secret".to_vec(), 10, Duration::from_secs(60));
-        master.handle_packet(
-            remote,
-            HbpPacket::RepeaterLogin { repeater_id },
-            now,
-        );
+        master.handle_packet(remote, HbpPacket::RepeaterLogin { repeater_id }, now);
 
         let events = master.handle_packet(
             remote,
@@ -749,11 +739,7 @@ mod tests {
         let remote = addr(50003);
         let repeater_id = 4_567_890;
         let mut master = HbpMaster::new(b"secret".to_vec(), 10, Duration::from_secs(10));
-        master.handle_packet(
-            remote,
-            HbpPacket::RepeaterLogin { repeater_id },
-            now,
-        );
+        master.handle_packet(remote, HbpPacket::RepeaterLogin { repeater_id }, now);
 
         let events = master.expire_sessions(now + Duration::from_secs(11));
         assert_eq!(events.len(), 1);

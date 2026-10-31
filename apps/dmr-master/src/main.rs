@@ -37,8 +37,7 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    let cfg =
-        std::env::var("DMR_HBLINK_CONFIG").unwrap_or_else(|_| "fixtures/hblink.cfg".into());
+    let cfg = std::env::var("DMR_HBLINK_CONFIG").unwrap_or_else(|_| "fixtures/hblink.cfg".into());
     let imported = import_hblink_cfg(PathBuf::from(cfg))?;
     info!(
         systems = imported.systems.len(),
@@ -51,11 +50,7 @@ async fn main() -> Result<()> {
         .unwrap_or(60);
 
     for s in imported.systems.iter().filter(|s| {
-        s.enabled
-            && matches!(
-                s.mode.to_ascii_uppercase().as_str(),
-                "MASTER" | "SERVER"
-            )
+        s.enabled && matches!(s.mode.to_ascii_uppercase().as_str(), "MASTER" | "SERVER")
     }) {
         if let (Some(ip), Some(port)) = (s.bind_ip.clone(), s.port) {
             let name = s.name.clone();

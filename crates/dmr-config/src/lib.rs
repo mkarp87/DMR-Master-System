@@ -28,20 +28,50 @@ pub struct LegacySystem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ImportedConfig { pub systems: Vec<LegacySystem> }
+pub struct ImportedConfig {
+    pub systems: Vec<LegacySystem>,
+}
 
 fn parse_bool(v: Option<&str>, default: bool) -> bool {
-    v.map(|x| matches!(x.trim().to_ascii_lowercase().as_str(), "true"|"yes"|"1"|"on")).unwrap_or(default)
+    v.map(|x| {
+        matches!(
+            x.trim().to_ascii_lowercase().as_str(),
+            "true" | "yes" | "1" | "on"
+        )
+    })
+    .unwrap_or(default)
 }
-fn parse_u16(v: Option<&str>) -> Option<u16> { v.and_then(|x| x.trim().parse().ok()) }
-fn parse_u32(v: Option<&str>) -> Option<u32> { v.and_then(|x| x.trim().parse().ok()) }
+fn parse_u16(v: Option<&str>) -> Option<u16> {
+    v.and_then(|x| x.trim().parse().ok())
+}
+fn parse_u32(v: Option<&str>) -> Option<u32> {
+    v.and_then(|x| x.trim().parse().ok())
+}
 
-pub fn normalize_mode(system: &str, mode: &str) -> Result<(EndpointProtocol, EndpointRole, EndpointKind), ConfigError> {
+pub fn normalize_mode(
+    system: &str,
+    mode: &str,
+) -> Result<(EndpointProtocol, EndpointRole, EndpointKind), ConfigError> {
     match mode.trim().to_ascii_uppercase().as_str() {
-        "MASTER" | "SERVER" => Ok((EndpointProtocol::Homebrew, EndpointRole::HomebrewServer, EndpointKind::Repeater)),
-        "PEER" | "CLIENT" | "OUTBOUND" => Ok((EndpointProtocol::Homebrew, EndpointRole::HomebrewOutbound, EndpointKind::Peer)),
-        "OPENBRIDGE" => Ok((EndpointProtocol::OpenBridge, EndpointRole::OpenBridge, EndpointKind::Peer)),
-        other => Err(ConfigError::UnsupportedMode { system: system.into(), mode: other.into() }),
+        "MASTER" | "SERVER" => Ok((
+            EndpointProtocol::Homebrew,
+            EndpointRole::HomebrewServer,
+            EndpointKind::Repeater,
+        )),
+        "PEER" | "CLIENT" | "OUTBOUND" => Ok((
+            EndpointProtocol::Homebrew,
+            EndpointRole::HomebrewOutbound,
+            EndpointKind::Peer,
+        )),
+        "OPENBRIDGE" => Ok((
+            EndpointProtocol::OpenBridge,
+            EndpointRole::OpenBridge,
+            EndpointKind::Peer,
+        )),
+        other => Err(ConfigError::UnsupportedMode {
+            system: system.into(),
+            mode: other.into(),
+        }),
     }
 }
 
@@ -52,10 +82,18 @@ pub fn import_hblink_cfg(path: impl AsRef<Path>) -> Result<ImportedConfig, Confi
     let skip = ["global", "reports", "logger", "aliases"];
     let mut systems = Vec::new();
     for (section, props) in map {
-        if skip.contains(&section.to_ascii_lowercase().as_str()) { continue; }
-        let get = |k: &str| props.get(&k.to_ascii_lowercase()).and_then(|v| v.as_deref());
+        if skip.contains(&section.to_ascii_lowercase().as_str()) {
+            continue;
+        }
+        let get = |k: &str| {
+            props
+                .get(&k.to_ascii_lowercase())
+                .and_then(|v| v.as_deref())
+        };
         let mode = get("mode").unwrap_or("").to_string();
-        if mode.is_empty() { continue; }
+        if mode.is_empty() {
+            continue;
+        }
         normalize_mode(&section, &mode)?;
         systems.push(LegacySystem {
             name: section,
@@ -63,8 +101,15 @@ pub fn import_hblink_cfg(path: impl AsRef<Path>) -> Result<ImportedConfig, Confi
             enabled: parse_bool(get("enabled"), true),
             bind_ip: get("ip").map(str::to_string),
             port: parse_u16(get("port")),
-            target_ip: get("target_ip").or_else(|| get("master_ip")).or_else(|| get("server_ip")).map(str::to_string),
-            target_port: parse_u16(get("target_port").or_else(|| get("master_port")).or_else(|| get("server_port"))),
+            target_ip: get("target_ip")
+                .or_else(|| get("master_ip"))
+                .or_else(|| get("server_ip"))
+                .map(str::to_string),
+            target_port: parse_u16(
+                get("target_port")
+                    .or_else(|| get("master_port"))
+                    .or_else(|| get("server_port")),
+            ),
             passphrase: get("passphrase").map(str::to_string),
             max_repeaters: parse_u32(get("max_repeaters").or_else(|| get("max_peers"))),
             group_hangtime: parse_u32(get("group_hangtime")),
