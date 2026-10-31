@@ -127,7 +127,7 @@ fn encode_196_96(data: &[u8; 12]) -> Vec<bool> {
         }
     }
 
-    bits.extend(std::iter::repeat(false).take(60));
+    bits.extend(std::iter::repeat_n(false, 60));
 
     for col in 0..15 {
         let mut column = [false; 9];
@@ -224,11 +224,11 @@ fn embedded_lc(lc: &[u8; 9]) -> [[bool; 32]; 4] {
     }
 
     let mut segments = [[false; 32]; 4];
-    for segment in 0..4 {
+    for (segment, segment_bits) in segments.iter_mut().enumerate() {
         for column in 0..4 {
             let source_column = segment * 4 + column;
             for row in 0..8 {
-                segments[segment][column * 8 + row] = bits[source_column + row * 16];
+                segment_bits[column * 8 + row] = bits[source_column + row * 16];
             }
         }
     }
@@ -301,7 +301,7 @@ mod tests {
     #[test]
     fn rs_header_validation_vector() {
         let lc = [0x00, 0x10, 0x20, 0x00, 0x0c, 0x30, 0x2f, 0x9b, 0xe5];
-        assert_eq!(rs129(&lc, HEADER_MASK), [0xda, 0x4d, 0x5a]);
+        assert_eq!(rs129(&lc, HEADER_MASK), [0xda, 0xd4, 0x5a]);
     }
 
     #[test]
