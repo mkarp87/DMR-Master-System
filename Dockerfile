@@ -1,4 +1,4 @@
-FROM rust:1.82-bookworm AS build
+FROM rust:1.99-bookworm AS build
 WORKDIR /src
 COPY . .
 RUN cargo test --workspace && cargo build --release -p dmr-master
