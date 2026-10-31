@@ -25,6 +25,11 @@ services:
       RUST_LOG: ${RUST_LOG:-info}
       DMR_HBLINK_CONFIG: /opt/dmr-master/fixtures/hblink.example.cfg
       DATABASE_URL: postgresql://dmr_master:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@127.0.0.1:5432/dmr_master
+      DMR_ADMIN_USERNAME: ${DMR_ADMIN_USERNAME:-admin}
+      DMR_ADMIN_PASSWORD: ${DMR_ADMIN_PASSWORD:?set DMR_ADMIN_PASSWORD in .env}
+      DMR_USE_DATABASE_CONFIG: ${DMR_USE_DATABASE_CONFIG:-false}
+      DMR_SERVER_ID: ${DMR_SERVER_ID:-999999}
+      DMR_UNIT_SYSTEMS: ${DMR_UNIT_SYSTEMS:-}
     depends_on:
       postgres:
         condition: service_healthy

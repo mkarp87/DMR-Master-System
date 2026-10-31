@@ -9,11 +9,15 @@ anyhow.workspace = true
 axum.workspace = true
 dmr-config = { path = "../../crates/dmr-config" }
 dmr-core = { path = "../../crates/dmr-core" }
+dmr-fec = { path = "../../crates/dmr-fec" }
 dmr-protocol-hbp = { path = "../../crates/dmr-protocol-hbp" }
+dmr-protocol-ipsc = { path = "../../crates/dmr-protocol-ipsc" }
 dmr-protocol-openbridge = { path = "../../crates/dmr-protocol-openbridge" }
 dmr-router = { path = "../../crates/dmr-router" }
+dmr-store = { path = "../../crates/dmr-store" }
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+uuid.workspace = true

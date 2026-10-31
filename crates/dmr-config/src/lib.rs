@@ -1,7 +1,7 @@
 use configparser::ini::Ini;
 use dmr_core::{
-    Bridge, BridgeMember, EndpointKind, EndpointProtocol, EndpointRole, TalkgroupId, TimeoutPolicy,
-    Timeslot,
+    Bridge, BridgeMember, EndpointKind, EndpointProtocol, EndpointRole, IpscRole, TalkgroupId,
+    TimeoutPolicy, Timeslot,
 };
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, path::Path};
@@ -46,6 +46,14 @@ pub struct ImportedConfig {
 pub struct ImportedNetwork {
     #[serde(default)]
     pub bridges: Vec<ImportedBridge>,
+    #[serde(default)]
+    pub unit_systems: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ImportedTopology {
+    pub bridges: Vec<Bridge>,
+    pub unit_systems: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -108,6 +116,11 @@ pub fn normalize_mode(
         "OPENBRIDGE" => Ok((
             EndpointProtocol::OpenBridge,
             EndpointRole::OpenBridge,
+            EndpointKind::Peer,
+        )),
+        "IPSC" => Ok((
+            EndpointProtocol::Ipsc,
+            EndpointRole::Ipsc(IpscRole::Peer),
             EndpointKind::Peer,
         )),
         other => Err(ConfigError::UnsupportedMode {
@@ -174,7 +187,7 @@ pub fn import_hblink_cfg(path: impl AsRef<Path>) -> Result<ImportedConfig, Confi
     Ok(ImportedConfig { server_id, systems })
 }
 
-pub fn import_network_json(path: impl AsRef<Path>) -> Result<Vec<Bridge>, ConfigError> {
+pub fn import_network_topology(path: impl AsRef<Path>) -> Result<ImportedTopology, ConfigError> {
     let data = fs::read_to_string(path).map_err(|e| ConfigError::Load(e.to_string()))?;
     let imported: ImportedNetwork = serde_json::from_str(&data)?;
     let mut bridges = Vec::with_capacity(imported.bridges.len());
@@ -214,7 +227,11 @@ pub fn import_network_json(path: impl AsRef<Path>) -> Result<Vec<Bridge>, Config
         });
     }
 
-    Ok(bridges)
+    Ok(ImportedTopology { bridges, unit_systems: imported.unit_systems })
+}
+
+pub fn import_network_json(path: impl AsRef<Path>) -> Result<Vec<Bridge>, ConfigError> {
+    Ok(import_network_topology(path)?.bridges)
 }
 
 #[cfg(test)]
@@ -228,6 +245,7 @@ mod tests {
         assert!(normalize_mode("x", "PEER").is_ok());
         assert!(normalize_mode("x", "OUTBOUND").is_ok());
         assert!(normalize_mode("x", "OPENBRIDGE").is_ok());
+        assert!(normalize_mode("x", "IPSC").is_ok());
     }
 
     #[test]
@@ -241,7 +259,8 @@ mod tests {
             ]
           }]
         }"#;
-        let path = std::env::temp_dir().join(format!("dmr-master-test-{}.json", std::process::id()));
+        let path =
+            std::env::temp_dir().join(format!("dmr-master-test-{}.json", std::process::id()));
         fs::write(&path, json).unwrap();
         let bridges = import_network_json(&path).unwrap();
         fs::remove_file(path).ok();
