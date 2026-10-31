@@ -1,0 +1,11 @@
+[package]
+name = "dmr-protocol-hbp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+dmr-core = { path = "../dmr-core" }
+rand.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
