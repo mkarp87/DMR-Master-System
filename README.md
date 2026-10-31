@@ -19,7 +19,7 @@ Early v0.1 development. The current tree establishes:
 
 ## Architecture
 
-```text
+```
 Homebrew/MMDVM ----\
 Hotspots -----------+--> protocol adapters --> common DMR core --> compiled router
 OpenBridge ---------+                                      |             |
@@ -31,7 +31,7 @@ The packet forwarding hot path is designed to be database-free. PostgreSQL is th
 
 ## Legacy migration check
 
-```bash
+```
 python3 tools/import_legacy.py \
   --config fixtures/hblink.example.cfg \
   --rules fixtures/rules.example.py \
@@ -42,7 +42,7 @@ The importer accepts both older HBlink3 naming and newer naming. It never silent
 
 ## Build/test with Docker
 
-```bash
+```
 docker build -t dmr-master-system:dev .
 ```
 
@@ -52,13 +52,13 @@ The build stage runs `cargo test --workspace` before producing the release binar
 
 Copy `.env.example` to `.env`, change the PostgreSQL password, then:
 
-```bash
+```
 docker compose up --build
 ```
 
 Public health endpoint:
 
-```text
+```
 GET /api/public/health
 ```
 
@@ -74,7 +74,3 @@ GET /api/public/health
 ## License
 
 GPL-3.0-only.
-
-## Public repository safety
-
-Do not commit production HBlink configurations, packet captures, passwords, private IP addressing, or generated imports derived from a live network. The files under `fixtures/` are intentionally synthetic examples. Keep real migration inputs outside the repository or under an ignored private path.
