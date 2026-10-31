@@ -58,7 +58,6 @@ pub struct BridgeRecord {
     pub members: Vec<BridgeMemberRecord>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TalkgroupRecord {
     pub id: i64,
@@ -229,7 +228,6 @@ impl Store {
         Ok(out)
     }
 
-
     pub async fn list_talkgroups(&self) -> Result<Vec<TalkgroupRecord>> {
         let rows = sqlx::query(
             "SELECT id,talkgroup,name,description,enabled FROM talkgroups ORDER BY talkgroup",
@@ -302,10 +300,18 @@ impl Store {
 
         for member in &bridge.members {
             if !matches!(member.timeslot, 1 | 2) {
-                return Err(anyhow!("bridge member {} has invalid timeslot {}", member.endpoint, member.timeslot));
+                return Err(anyhow!(
+                    "bridge member {} has invalid timeslot {}",
+                    member.endpoint,
+                    member.timeslot
+                ));
             }
             if !(1..=16_777_215).contains(&member.talkgroup) {
-                return Err(anyhow!("bridge member {} has invalid talkgroup {}", member.endpoint, member.talkgroup));
+                return Err(anyhow!(
+                    "bridge member {} has invalid talkgroup {}",
+                    member.endpoint,
+                    member.talkgroup
+                ));
             }
             let endpoint_id: Uuid = sqlx::query_scalar("SELECT id FROM endpoints WHERE name=$1")
                 .bind(&member.endpoint)
@@ -487,7 +493,14 @@ impl Store {
         Ok(())
     }
 
-    pub async fn audit(&self, user_id: Uuid, action: &str, object_type: &str, object_id: Option<&str>, after: Option<&Value>) -> Result<()> {
+    pub async fn audit(
+        &self,
+        user_id: Uuid,
+        action: &str,
+        object_type: &str,
+        object_id: Option<&str>,
+        after: Option<&Value>,
+    ) -> Result<()> {
         sqlx::query("INSERT INTO audit_log(user_id,action,object_type,object_id,after_state) VALUES($1,$2,$3,$4,$5)")
             .bind(user_id)
             .bind(action)

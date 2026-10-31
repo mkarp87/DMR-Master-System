@@ -227,7 +227,10 @@ pub fn import_network_topology(path: impl AsRef<Path>) -> Result<ImportedTopolog
         });
     }
 
-    Ok(ImportedTopology { bridges, unit_systems: imported.unit_systems })
+    Ok(ImportedTopology {
+        bridges,
+        unit_systems: imported.unit_systems,
+    })
 }
 
 pub fn import_network_json(path: impl AsRef<Path>) -> Result<Vec<Bridge>, ConfigError> {

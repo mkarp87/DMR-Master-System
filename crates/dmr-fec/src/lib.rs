@@ -173,7 +173,14 @@ fn lc_word(destination: u32, source: u32) -> Result<[u8; 9], FecError> {
 }
 
 fn full_lc_bits(lc: &[u8; 9], terminator: bool) -> Vec<bool> {
-    let parity = rs129(lc, if terminator { TERMINATOR_MASK } else { HEADER_MASK });
+    let parity = rs129(
+        lc,
+        if terminator {
+            TERMINATOR_MASK
+        } else {
+            HEADER_MASK
+        },
+    );
     let mut full = [0u8; 12];
     full[..9].copy_from_slice(lc);
     full[9..].copy_from_slice(&parity);
@@ -329,20 +336,20 @@ mod tests {
 // -----------------------------------------------------------------------------
 
 const AMBE_RW: [usize; 36] = [
-    0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2,
-    0, 2, 0, 2, 0, 2, 0, 2,
+    0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2,
+    0, 2, 0, 2,
 ];
 const AMBE_RX: [usize; 36] = [
-    23, 10, 22, 9, 21, 8, 20, 7, 19, 6, 18, 5, 17, 4, 16, 3, 15, 2, 14, 1, 13, 0, 12,
-    10, 11, 9, 10, 8, 9, 7, 8, 6, 7, 5, 6, 4,
+    23, 10, 22, 9, 21, 8, 20, 7, 19, 6, 18, 5, 17, 4, 16, 3, 15, 2, 14, 1, 13, 0, 12, 10, 11, 9,
+    10, 8, 9, 7, 8, 6, 7, 5, 6, 4,
 ];
 const AMBE_RY: [usize; 36] = [
-    0, 2, 0, 2, 0, 2, 0, 2, 0, 3, 0, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3,
-    1, 3, 1, 3, 1, 3, 1, 3,
+    0, 2, 0, 2, 0, 2, 0, 2, 0, 3, 0, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3,
+    1, 3, 1, 3,
 ];
 const AMBE_RZ: [usize; 36] = [
-    5, 3, 4, 2, 3, 1, 2, 0, 1, 13, 0, 12, 22, 11, 21, 10, 20, 9, 19, 8, 18, 7, 17, 6, 16,
-    5, 15, 4, 14, 3, 13, 2, 12, 1, 11, 0,
+    5, 3, 4, 2, 3, 1, 2, 0, 1, 13, 0, 12, 22, 11, 21, 10, 20, 9, 19, 8, 18, 7, 17, 6, 16, 5, 15, 4,
+    14, 3, 13, 2, 12, 1, 11, 0,
 ];
 
 const BS_VOICE_SYNC: [u8; 6] = [0x75, 0x5f, 0xd7, 0xdf, 0x75, 0xf7];
@@ -497,9 +504,20 @@ pub fn group_embedded_lc(destination: u32, source: u32) -> Result<[[u8; 4]; 4], 
 }
 
 /// Return the RS(12,9) parity bytes used in an IPSC voice header/terminator.
-pub fn group_lc_parity(destination: u32, source: u32, terminator: bool) -> Result<[u8; 3], FecError> {
+pub fn group_lc_parity(
+    destination: u32,
+    source: u32,
+    terminator: bool,
+) -> Result<[u8; 3], FecError> {
     let lc = lc_word(destination, source)?;
-    Ok(rs129(&lc, if terminator { TERMINATOR_MASK } else { HEADER_MASK }))
+    Ok(rs129(
+        &lc,
+        if terminator {
+            TERMINATOR_MASK
+        } else {
+            HEADER_MASK
+        },
+    ))
 }
 
 /// Return the 9-byte Group Voice Link Control word.
@@ -508,10 +526,18 @@ pub fn group_lc(destination: u32, source: u32) -> Result<[u8; 9], FecError> {
 }
 
 /// Construct a complete 33-byte DMR voice header or terminator payload (CC=1).
-pub fn build_group_voice_lc_payload(destination: u32, source: u32, terminator: bool) -> Result<[u8; 33], FecError> {
+pub fn build_group_voice_lc_payload(
+    destination: u32,
+    source: u32,
+    terminator: bool,
+) -> Result<[u8; 33], FecError> {
     let lc = lc_word(destination, source)?;
     let encoded = full_lc_bits(&lc, terminator);
-    let slot = if terminator { SLOT_TYPE_VOICE_TERM } else { SLOT_TYPE_VOICE_HEAD };
+    let slot = if terminator {
+        SLOT_TYPE_VOICE_TERM
+    } else {
+        SLOT_TYPE_VOICE_HEAD
+    };
     let sync = bytes_to_bits(&BS_DATA_SYNC);
     let mut bits = Vec::with_capacity(264);
     bits.extend_from_slice(&encoded[..98]);
@@ -635,6 +661,9 @@ mod voice_tests {
         let term = build_group_voice_lc_payload(1001, 1_234_567, true).unwrap();
         assert_ne!(header, term);
         let header_bits = bytes_to_bits(&header);
-        assert_eq!(&header_bits[108..156], bytes_to_bits(&BS_DATA_SYNC).as_slice());
+        assert_eq!(
+            &header_bits[108..156],
+            bytes_to_bits(&BS_DATA_SYNC).as_slice()
+        );
     }
 }
