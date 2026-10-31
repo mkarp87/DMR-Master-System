@@ -1,9 +1,0 @@
-[package]
-name = "dmr-router"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
-
-[dependencies]
-dmr-core = { path = "../dmr-core" }
-serde.workspace = true
