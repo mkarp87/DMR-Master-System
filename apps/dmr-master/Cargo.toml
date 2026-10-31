@@ -10,6 +10,7 @@ axum.workspace = true
 dmr-config = { path = "../../crates/dmr-config" }
 dmr-core = { path = "../../crates/dmr-core" }
 dmr-protocol-hbp = { path = "../../crates/dmr-protocol-hbp" }
+dmr-protocol-openbridge = { path = "../../crates/dmr-protocol-openbridge" }
 dmr-router = { path = "../../crates/dmr-router" }
 serde.workspace = true
 serde_json.workspace = true

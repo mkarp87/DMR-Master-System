@@ -5,5 +5,8 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+dmr-core = { path = "../dmr-core" }
 dmr-protocol-hbp = { path = "../dmr-protocol-hbp" }
+hmac.workspace = true
+sha1.workspace = true
 thiserror.workspace = true
